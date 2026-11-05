@@ -1,0 +1,5 @@
+package com.election.authservice.service;
+
+public class AuthService {
+
+}

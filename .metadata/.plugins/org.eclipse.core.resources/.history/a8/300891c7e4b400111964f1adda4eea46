@@ -1,0 +1,5 @@
+package com.election.electionservice.service;
+
+public class CandidateService {
+
+}

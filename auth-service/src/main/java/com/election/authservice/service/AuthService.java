@@ -1,0 +1,75 @@
+package com.election.authservice.service;
+
+import java.time.LocalDateTime;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.election.authservice.entity.Role;
+import com.election.authservice.entity.User;
+import com.election.authservice.repository.UserRepository;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public User signup(String fullName,
+                       String username,
+                       String email,
+                       String password) {
+
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        String encodedPassword = passwordEncoder.encode(password);
+
+        User user = new User();
+
+        user.setFullName(fullName);
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
+
+        // Every user who signs up is automatically a voter.
+        user.setRole(Role.VOTER);
+
+        user.setCreatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
+    }
+
+    public boolean login(String username, String password) {
+
+        User user = userRepository.findByUsername(username)
+                .orElse(null);
+
+        if (user == null) {
+            return false;
+        }
+
+        return passwordEncoder.matches(
+                password,
+                user.getPassword()
+        );
+    }
+
+    public User findByUsername(String username) {
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+    }
+}

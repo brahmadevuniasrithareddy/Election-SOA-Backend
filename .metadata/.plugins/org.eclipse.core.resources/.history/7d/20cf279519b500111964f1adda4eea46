@@ -1,0 +1,8 @@
+package com.election.voteservice.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.election.voteservice.entity.Vote;
+
+public interface VoteRepository extends JpaRepository<Vote, Long> {
+}

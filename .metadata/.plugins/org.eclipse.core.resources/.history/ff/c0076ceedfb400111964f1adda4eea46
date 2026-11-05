@@ -1,0 +1,5 @@
+package com.election.electionservice.repository;
+
+public class ElectionRepository {
+
+}

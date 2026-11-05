@@ -1,0 +1,48 @@
+package controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.election.authservice.dto.LoginRequest;
+import com.election.authservice.dto.SignupRequest;
+import com.election.authservice.entity.User;
+import com.election.authservice.service.AuthService;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<User> signup(@RequestBody SignupRequest request) {
+
+        User user = authService.signup(
+                request.getFullName(),
+                request.getUsername(),
+                request.getEmail(),
+                request.getPassword()
+        );
+
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+
+        boolean valid = authService.login(
+                request.getUsername(),
+                request.getPassword()
+        );
+
+        if (valid) {
+            return ResponseEntity.ok("Login successful");
+        }
+
+        return ResponseEntity.status(401).body("Invalid username or password");
+    }
+}

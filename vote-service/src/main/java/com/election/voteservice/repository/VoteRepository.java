@@ -1,0 +1,28 @@
+package com.election.voteservice.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.election.voteservice.entity.Vote;
+
+public interface VoteRepository extends JpaRepository<Vote, Long> {
+
+    List<Vote> findByElectionId(Long electionId);
+
+    long countByElectionIdAndCandidateId(
+            Long electionId,
+            Long candidateId);
+
+    @Query("""
+        SELECT v.candidateId, COUNT(v)
+        FROM Vote v
+        WHERE v.electionId = :electionId
+        GROUP BY v.candidateId
+        ORDER BY COUNT(v) DESC
+        """)
+    List<Object[]> getResults(
+            @Param("electionId") Long electionId);
+}

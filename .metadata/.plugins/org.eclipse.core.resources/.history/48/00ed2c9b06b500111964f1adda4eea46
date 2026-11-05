@@ -1,0 +1,5 @@
+package com.election.auditservice.repository;
+
+public class AuditLogRepository {
+
+}

@@ -1,0 +1,78 @@
+package com.election.voteservice.service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.election.voteservice.entity.Vote;
+import com.election.voteservice.entity.VoterParticipation;
+import com.election.voteservice.repository.VoteRepository;
+import com.election.voteservice.repository.VoterParticipationRepository;
+
+@Service
+public class VoteService {
+
+    private final VoteRepository voteRepository;
+    private final VoterParticipationRepository participationRepository;
+
+    public VoteService(
+            VoteRepository voteRepository,
+            VoterParticipationRepository participationRepository) {
+
+        this.voteRepository = voteRepository;
+        this.participationRepository = participationRepository;
+    }
+
+    public Vote castVote(
+            Long electionId,
+            Long candidateId,
+            Long voterId) {
+
+        // Check whether the voter has already voted.
+        if (participationRepository
+                .existsByElectionIdAndVoterId(
+                        electionId,
+                        voterId)) {
+
+            throw new RuntimeException(
+                    "Voter has already voted in this election");
+        }
+
+        // Create the vote.
+        Vote vote = new Vote();
+
+        vote.setElectionId(electionId);
+        vote.setCandidateId(candidateId);
+
+        vote.setVoteReference(
+                "VOTE-" + UUID.randomUUID()
+        );
+
+        vote.setCreatedAt(LocalDateTime.now());
+
+        Vote savedVote = voteRepository.save(vote);
+
+        // Record voter participation separately.
+        VoterParticipation participation =
+                new VoterParticipation();
+
+        participation.setElectionId(electionId);
+        participation.setVoterId(voterId);
+        participation.setVotedAt(LocalDateTime.now());
+
+        participationRepository.save(participation);
+
+        return savedVote;
+    }
+
+    public boolean hasVoted(
+            Long electionId,
+            Long voterId) {
+
+        return participationRepository
+                .existsByElectionIdAndVoterId(
+                        electionId,
+                        voterId);
+    }
+}

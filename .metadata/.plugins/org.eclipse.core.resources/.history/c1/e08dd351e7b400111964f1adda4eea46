@@ -1,0 +1,5 @@
+package com.election.voteservice.repository;
+
+public class VoteRepository {
+
+}

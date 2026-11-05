@@ -1,0 +1,5 @@
+package com.election.auditservice.config;
+
+public class SecurityConfig {
+
+}

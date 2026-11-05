@@ -1,0 +1,5 @@
+package com.election.voteservice.service;
+
+public class VoteService {
+
+}

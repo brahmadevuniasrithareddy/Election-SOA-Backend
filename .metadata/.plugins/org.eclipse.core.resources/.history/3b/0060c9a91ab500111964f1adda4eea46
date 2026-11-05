@@ -1,0 +1,110 @@
+package com.election.voteservice.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import com.election.voteservice.entity.Vote;
+import com.election.voteservice.service.VoteService;
+
+@RestController
+@RequestMapping("/api/votes")
+public class VoteController {
+
+    private final VoteService voteService;
+
+    public VoteController(VoteService voteService) {
+        this.voteService = voteService;
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "Vote Service Controller is working";
+    }
+
+    @PostMapping
+    public ResponseEntity<?> castVote(
+            @RequestParam Long electionId,
+            @RequestParam Long candidateId,
+            Authentication authentication) {
+
+        try {
+            Long voterId =
+                    Long.valueOf(authentication.getName());
+
+            Vote vote =
+                    voteService.castVote(
+                            electionId,
+                            candidateId,
+                            voterId);
+
+            Map<String, Object> response =
+                    new HashMap<>();
+
+            response.put(
+                    "message",
+                    "Vote cast successfully");
+
+            response.put(
+                    "voteReference",
+                    vote.getVoteReference());
+
+            response.put(
+                    "electionId",
+                    vote.getElectionId());
+
+            response.put(
+                    "createdAt",
+                    vote.getCreatedAt());
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> checkVoteStatus(
+            @RequestParam Long electionId,
+            Authentication authentication) {
+
+        Long voterId =
+                Long.valueOf(authentication.getName());
+
+        boolean hasVoted =
+                voteService.hasVoted(
+                        electionId,
+                        voterId);
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put(
+                "electionId",
+                electionId);
+
+        response.put(
+                "hasVoted",
+                hasVoted);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/results")
+    public ResponseEntity<?> getResults(
+            @RequestParam Long electionId) {
+
+        List<Object[]> results =
+                voteService.getResults(electionId);
+
+        return ResponseEntity.ok(results);
+    }
+}
